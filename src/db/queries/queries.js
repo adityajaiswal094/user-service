@@ -9,17 +9,18 @@ const checkUserExist = async (key, value) => {
 };
 
 const getUserByEmailOrPhone = async (key, value) => {
-  const query = `SELECT id, name, email, phone_no FROM users WHERE ${key}=$1`;
+  const query = `SELECT id, name, email, phone_no FROM users WHERE ${key} LIKE $1`;
 
-  const result = await pool.query(query, [value]);
+  const result = await pool.query(query, [`%${value}%`]);
 
-  return result.rows[0];
+  return result.rows;
 };
 
 const getUserByName = async (name) => {
-  const query = "SELECT id, name, email, phone_no FROM users WHERE name=$1";
+  let lowerCaseName = name.toLowerCase();
+  const query = "SELECT id, name, email, phone_no FROM users WHERE LOWER(name) LIKE $1";
 
-  const result = await pool.query(query, [name]);
+  const result = await pool.query(query, [`%${lowerCaseName}%`]);
 
   return result.rows;
 };
