@@ -7,7 +7,7 @@ exports.up = function(knex) {
     table.increments('id').primary().notNullable();
     table.string('name').index().notNullable();
     table.string('email').unique().notNullable();
-    table.string('phoneNo').unique().notNullable();
+    table.string('phone_no').unique().notNullable();
     table.string("password").notNullable();
     table
       .datetime("createdAt")

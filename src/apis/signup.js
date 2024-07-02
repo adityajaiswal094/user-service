@@ -1,35 +1,39 @@
-const { getUserByPhone, getUserByEmail } = require("../db/queries/queries");
-const { hashPassword } = require("../utils/helper");
+const queries = require("../db/queries/queries");
+const { hashPassword, comparePassword } = require("../utils/helper");
 
 const user_signup = (app) => {
   app.post("/v1/signup", async (req, res) => {
     try {
-      const { name = "", email = "", phoneNo = "", password = "" } = req.body;
+      const { name = "", email = "", phone_no = "", password = "" } = req.body;
+      const device_id = req.header("device_id");
 
-      if (name === "" || email === "" || phoneNo === "" || password === "") {
+      if (device_id === undefined || device_id === "") {
+        return res.status(400).json({
+          title: "Bad Request",
+          message: "Header device_id is missing.",
+        });
+      }
+
+      if (name === "" || email === "" || phone_no === "" || password === "") {
         return res
           .status(400)
           .json({ title: "Bad Request", message: "Missing required fields." });
       }
 
-      const checkUserExist = await getUserByPhone(phoneNo);
+      let checkUserExist = await queries.checkUserExist("phone_no", phone_no);
       if (checkUserExist !== undefined) {
-        return res
-          .status(409)
-          .json({
-            title: "Conflict",
-            message: "User with the given phone number already exists.",
-          });
+        return res.status(409).json({
+          title: "Conflict",
+          message: "User with the given phone number already exists.",
+        });
       }
 
-      checkUserExist = await getUserByEmail(email);
+      checkUserExist = await queries.checkUserExist("email", email);
       if (checkUserExist !== undefined) {
-        return res
-          .status(409)
-          .json({
-            title: "Conflict",
-            message: "User with the given email already exists.",
-          });
+        return res.status(409).json({
+          title: "Conflict",
+          message: "User with the given email already exists.",
+        });
       }
 
       const hashedPassword = await hashPassword(password);
@@ -38,14 +42,20 @@ const user_signup = (app) => {
         name: name,
         email: email,
         password: hashedPassword,
-        phoneNo: phoneNo,
+        phone_no: phone_no,
       };
 
-      const response = await addUser(userDetails);
+      const addUserResponse = await queries.addUser(userDetails);
+
+      const loginResponse = await queries.loginUser(
+        addUserResponse.id,
+        device_id
+      );
+
 
       return res
         .status(201)
-        .json({ title: "User Registered Successfully", data: response });
+        .json({ title: "User Registered Successfully", data: addUserResponse });
     } catch (error) {
       console.error(error);
       return res.status(500).json({
