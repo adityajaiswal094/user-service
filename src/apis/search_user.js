@@ -63,19 +63,9 @@ const search_user = (app) => {
     });
   } catch (error) {
     console.error(error);
-
-    // Check for specific error message
-    if (error.message === "Invalid key provided") {
-      return res.status(400).json({
-        title: "Bad Request",
-        message: error.message,
-      });
-    }
-
-    // Return a generic internal server error response
     return res.status(500).json({
       title: "Internal Server Error",
-      message: error.message ?? "Something went wrong!",
+      message: error.message.length != 0 ? error.message : "Something went wrong!",
     });
   }
 };

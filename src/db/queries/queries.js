@@ -18,7 +18,8 @@ const getUserByEmailOrPhone = async (key, value) => {
 
 const getUserByName = async (name) => {
   let lowerCaseName = name.toLowerCase();
-  const query = "SELECT id, name, email, phone_no FROM users WHERE LOWER(name) LIKE $1";
+  const query =
+    "SELECT id, name, email, phone_no FROM users WHERE LOWER(name) LIKE $1";
 
   const result = await pool.query(query, [`%${lowerCaseName}%`]);
 
@@ -52,7 +53,8 @@ const checkUserLoggedIn = async (user_id, device_id) => {
 };
 
 const loginUser = async (user_id, device_id) => {
-  const query = "INSERT INTO sessions (user_id, device_id) VALUES ($1, $2) RETURNING *";
+  const query =
+    "INSERT INTO sessions (user_id, device_id) VALUES ($1, $2) RETURNING *";
 
   const result = await pool.query(query, [user_id, device_id]);
 
@@ -65,6 +67,14 @@ const loginUser = async (user_id, device_id) => {
   return data;
 };
 
+const getLoggedInUsers = async () => {
+  const query = "SELECT * FROM sessions";
+
+  const result = await pool.query(query);
+
+  return result.rows;
+};
+
 module.exports = {
   checkUserExist,
   getUserByEmailOrPhone,
@@ -72,4 +82,5 @@ module.exports = {
   addUser,
   checkUserLoggedIn,
   loginUser,
+  getLoggedInUsers,
 };
