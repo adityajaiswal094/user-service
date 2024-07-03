@@ -9,7 +9,7 @@ const search_user = (app) => {
 
       if (name === undefined && phone_no === undefined && email === undefined) {
         return res.status(404).json({
-          title: "404 Error Not Found",
+          title: "404 Not Found",
           message: "Url does not exist",
         });
       }
